@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador da Lei de Ohm</title>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #f9fafb;
+      --muted: #cbd5e1;
+      --voltage: #38bdf8;
+      --current: #22c55e;
+      --resistance: #ef4444;
+      --wire: #94a3b8;
+      --lamp: #facc15;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at top, #1e293b, var(--bg));
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: min(1150px, 100%);
+      background: rgba(17, 24, 39, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4rem);
+    }
+
+    .formula {
+      margin-top: 10px;
+      font-size: clamp(1.6rem, 4vw, 3rem);
+      font-weight: bold;
+    }
+
+    .formula .v {
+      color: var(--voltage);
+    }
+
+    .formula .i {
+      color: var(--current);
+    }
+
+    .formula .r {
+      color: var(--resistance);
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .circuit-card,
+    .controls-card {
+      background: rgba(15, 23, 42, 0.92);
+      border-radius: 20px;
+      padding: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #020617;
+      border-radius: 18px;
+    }
+
+    .wire {
+      fill: none;
+      stroke: var(--wire);
+      stroke-width: 18;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.95;
+    }
+
+    .wire-shadow {
+      fill: none;
+      stroke: #020617;
+      stroke-width: 32;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.45;
+    }
+
+    .charge {
+      fill: var(--current);
+      opacity: 1;
+      filter: drop-shadow(0 0 8px rgba(34, 197, 94, 1));
+    }
+
+    .battery-body {
+      fill: #0f172a;
+      stroke: var(--voltage);
+      stroke-width: 5;
+      filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.55));
+    }
+
+    .battery-text {
+      fill: var(--voltage);
+      font-weight: bold;
+      font-size: 30px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    .resistor-body {
+      fill: rgba(239, 68, 68, 0.25);
+      stroke: var(--resistance);
+      stroke-width: 6;
+      filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.45));
+    }
+
+    .resistor-text {
+      fill: var(--resistance);
+      font-weight: bold;
+      font-size: 28px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+    }
+
+    .pinch-arrow {
+      fill: var(--resistance);
+      opacity: 0.9;
+    }
+
+    .lamp-glow {
+      fill: var(--lamp);
+      opacity: 0.35;
+      filter: blur(18px);
+    }
+
+    .lamp {
+      fill: url(#lampGradient);
+      stroke: #fde68a;
+      stroke-width: 5;
+      filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.65));
+    }
+
+    .lamp-base {
+      fill: #64748b;
+    }
+
+    .labels {
+      display: flex;
+      justify-content: space-around;
+      gap: 12px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .label {
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .label.v {
+      color: var(--voltage);
+    }
+
+    .label.i {
+      color: var(--current);
+    }
+
+    .label.r {
+      color: var(--resistance);
+    }
+
+    .control {
+      margin-bottom: 26px;
+    }
+
+    .control-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .control-title.voltage {
+      color: var(--voltage);
+    }
+
+    .control-title.resistance {
+      color: var(--resistance);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    #voltage {
+      accent-color: var(--voltage);
+    }
+
+    #resistance {
+      accent-color: var(--resistance);
+    }
+
+    .result {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 18px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .result .big {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--current);
+      font-weight: bold;
+      margin: 8px 0;
+    }
+
+    .explanation {
+      margin-top: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+
+    .explanation strong {
+      color: var(--text);
+    }
+
+    @media (max-width: 850px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Simulador da Lei de Ohm</h1>
+      <div class="formula">
+        <span class="v">V</span> =
+        <span class="i">I</span> ×
+        <span class="r">R</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="circuit-card">
+        <svg id="circuitSvg" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="lampGradient" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#fff7ad" />
+              <stop offset="55%" stop-color="#facc15" />
+              <stop offset="100%" stop-color="#ca8a04" />
+            </radialGradient>
+
+            <path
+              id="currentPath"
+              d="M 140 280 L 140 120 L 420 120 C 465 120 485 120 520 120 C 555 120 575 120 620 120 L 760 120 L 760 280 L 140 280"
+            />
+          </defs>
+
+          <use href="#currentPath" class="wire-shadow" />
+          <use href="#currentPath" class="wire" />
+
+          <rect x="82" y="210" width="115" height="145" rx="18" class="battery-body" />
+          <text x="140" y="250" class="battery-text">+</text>
+          <text x="140" y="315" class="battery-text">−</text>
+          <text x="140" y="385" class="battery-text" id="batteryLabel">12 V</text>
+
+          <path id="resistorShape" class="resistor-body"></path>
+
+          <polygon id="topPinch" class="pinch-arrow" points="500,40 540,40 520,75" />
+          <polygon id="bottomPinch" class="pinch-arrow" points="500,200 540,200 520,165" />
+
+          <text x="520" y="120" class="resistor-text" id="resistorLabel">6 Ω</text>
+
+          <circle id="lampGlow" cx="760" cy="280" r="78" class="lamp-glow" />
+          <circle cx="760" cy="280" r="46" class="lamp" />
+          <rect x="735" y="325" width="50" height="38" rx="7" class="lamp-base" />
+
+          <g id="chargesGroup"></g>
+        </svg>
+
+        <div class="labels">
+          <div class="label v">Tensão: força que empurra</div>
+          <div class="label i">Corrente: movimento das cargas</div>
+          <div class="label r">Resistência: dificuldade</div>
+        </div>
+      </section>
+
+      <section class="controls-card">
+        <div class="control">
+          <div class="control-title voltage">
+            <span>Tensão elétrica</span>
+            <span id="voltageValue">12 V</span>
+          </div>
+          <input
+            id="voltage"
+            type="range"
+            min="1"
+            max="24"
+            value="12"
+            step="1"
+          />
+        </div>
+
+        <div class="control">
+          <div class="control-title resistance">
+            <span>Resistência elétrica</span>
+            <span id="resistanceValue">6 Ω</span>
+          </div>
+          <input
+            id="resistance"
+            type="range"
+            min="1"
+            max="20"
+            value="6"
+            step="1"
+          />
+        </div>
+
+        <div class="result">
+          <div>Corrente elétrica</div>
+          <div class="big" id="currentValue">2,00 A</div>
+          <div id="calculation">I = 12 ÷ 6 = 2,00 A</div>
+        </div>
+
+        <div class="explanation" id="explanation">
+          Aumentar a <strong>tensão</strong> aumenta a corrente.
+          Aumentar a <strong>resistência</strong> diminui a corrente.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const voltageSlider = document.getElementById("voltage");
+    const resistanceSlider = document.getElementById("resistance");
+
+    const voltageValue = document.getElementById("voltageValue");
+    const resistanceValue = document.getElementById("resistanceValue");
+    const currentValue = document.getElementById("currentValue");
+    const calculation = document.getElementById("calculation");
+
+    const batteryLabel = document.getElementById("batteryLabel");
+    const resistorLabel = document.getElementById("resistorLabel");
+
+    const lampGlow = document.getElementById("lampGlow");
+    const explanation = document.getElementById("explanation");
+
+    const resistorShape = document.getElementById("resistorShape");
+    const topPinch = document.getElementById("topPinch");
+    const bottomPinch = document.getElementById("bottomPinch");
+
+    const currentPath = document.getElementById("currentPath");
+    const chargesGroup = document.getElementById("chargesGroup");
+
+    const CHARGE_COUNT = 8;
+    const CHARGE_RADIUS = 10;
+
+    let currentSpeed = 120;
+    let distanceOffset = 0;
+    let lastTime = null;
+    let pathLength = 0;
+    let charges = [];
+
+    function formatNumber(value) {
+      return value.toFixed(2).replace(".", ",");
+    }
+
+    function map(value, inMin, inMax, outMin, outMax) {
+      return outMin + ((value - inMin) * (outMax - outMin)) / (inMax - inMin);
+    }
+
+    function createCharges() {
+      chargesGroup.innerHTML = "";
+      charges = [];
+
+      for (let i = 0; i < CHARGE_COUNT; i++) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("r", CHARGE_RADIUS);
+        circle.setAttribute("class", "charge");
+        chargesGroup.appendChild(circle);
+        charges.push(circle);
+      }
+    }
+
+    function updateChargePositions() {
+      for (let i = 0; i < CHARGE_COUNT; i++) {
+        const spacing = pathLength / CHARGE_COUNT;
+        const distance = (distanceOffset + i * spacing) % pathLength;
+        const point = currentPath.getPointAtLength(distance);
+
+        charges[i].setAttribute("cx", point.x);
+        charges[i].setAttribute("cy", point.y);
+        charges[i].setAttribute("r", CHARGE_RADIUS);
+        charges[i].setAttribute("opacity", 1);
+      }
+    }
+
+    function animateCharges(timestamp) {
+      if (lastTime === null) {
+        lastTime = timestamp;
+      }
+
+      const deltaTime = (timestamp - lastTime) / 1000;
+      lastTime = timestamp;
+
+      distanceOffset = (distanceOffset + currentSpeed * deltaTime) % pathLength;
+
+      updateChargePositions();
+
+      requestAnimationFrame(animateCharges);
+    }
+
+    function updateResistorShape(resistance) {
+      const x1 = 420;
+      const x2 = 620;
+      const cx = 520;
+      const cy = 120;
+
+      const endHalfHeight = 48;
+
+      /*
+        Resistência baixa: meio mais aberto.
+        Resistência alta: meio mais apertado.
+      */
+      const centerHalfHeight = map(resistance, 1, 20, 42, 10);
+
+      const d = `
+        M ${x1} ${cy - endHalfHeight}
+        C 455 ${cy - endHalfHeight}, 475 ${cy - centerHalfHeight}, ${cx} ${cy - centerHalfHeight}
+        C 565 ${cy - centerHalfHeight}, 585 ${cy - endHalfHeight}, ${x2} ${cy - endHalfHeight}
+        L ${x2} ${cy + endHalfHeight}
+        C 585 ${cy + endHalfHeight}, 565 ${cy + centerHalfHeight}, ${cx} ${cy + centerHalfHeight}
+        C 475 ${cy + centerHalfHeight}, 455 ${cy + endHalfHeight}, ${x1} ${cy + endHalfHeight}
+        Z
+      `;
+
+      resistorShape.setAttribute("d", d);
+
+      const arrowMove = map(resistance, 1, 20, 0, 40);
+
+      topPinch.setAttribute("transform", `translate(0 ${arrowMove})`);
+      bottomPinch.setAttribute("transform", `translate(0 ${-arrowMove})`);
+    }
+
+    function updateSimulation() {
+      const voltage = Number(voltageSlider.value);
+      const resistance = Number(resistanceSlider.value);
+      const current = voltage / resistance;
+
+      voltageValue.textContent = `${voltage} V`;
+      resistanceValue.textContent = `${resistance} Ω`;
+      currentValue.textContent = `${formatNumber(current)} A`;
+
+      batteryLabel.textContent = `${voltage} V`;
+      resistorLabel.textContent = `${resistance} Ω`;
+
+      calculation.textContent =
+        `I = ${voltage} ÷ ${resistance} = ${formatNumber(current)} A`;
+
+      const normalizedCurrent = Math.min(current / 8, 1);
+
+      lampGlow.setAttribute("opacity", 0.15 + normalizedCurrent * 0.75);
+      lampGlow.setAttribute("r", 60 + normalizedCurrent * 55);
+
+      /*
+        Corrente maior = bolinhas mais rápidas.
+        Tamanho e quantidade nunca mudam.
+      */
+        
+      currentSpeed = map(Math.min(current, 24), 0, 24, 30, 1500);
+
+      updateResistorShape(resistance);
+
+      if (current < 1) {
+        explanation.innerHTML =
+          "A corrente está <strong>baixa</strong>: as cargas se movem mais devagar.";
+      } else if (current < 4) {
+        explanation.innerHTML =
+          "A corrente está <strong>moderada</strong>: as cargas se movem em velocidade normal.";
+      } else {
+        explanation.innerHTML =
+          "A corrente está <strong>alta</strong>: as cargas se movem mais rápido.";
+      }
+    }
+
+    voltageSlider.addEventListener("input", updateSimulation);
+    resistanceSlider.addEventListener("input", updateSimulation);
+
+    pathLength = currentPath.getTotalLength();
+
+    createCharges();
+    updateSimulation();
+    updateChargePositions();
+
+    requestAnimationFrame(animateCharges);
+  </script>
+</body>
+</html>
