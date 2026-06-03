@@ -18,9 +18,7 @@
       --lamp: #facc15;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -35,7 +33,7 @@
     }
 
     .container {
-      width: min(1150px, 100%);
+      width: min(1180px, 100%);
       background: rgba(17, 24, 39, 0.94);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 24px;
@@ -43,10 +41,7 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
+    header { text-align: center; margin-bottom: 18px; }
 
     h1 {
       margin: 0;
@@ -59,16 +54,35 @@
       font-weight: bold;
     }
 
-    .formula .u {
+    .u { color: var(--voltage); }
+    .i { color: var(--current); }
+    .r { color: var(--resistance); }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 18px 0 24px;
+    }
+
+    .tab {
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      font-weight: bold;
+      font-size: 1rem;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tab.active {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--voltage);
       color: var(--voltage);
-    }
-
-    .formula .i {
-      color: var(--current);
-    }
-
-    .formula .r {
-      color: var(--resistance);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
     }
 
     .main {
@@ -128,7 +142,7 @@
     .battery-text {
       fill: var(--voltage);
       font-weight: bold;
-      font-size: 30px;
+      font-size: 29px;
       text-anchor: middle;
       dominant-baseline: middle;
     }
@@ -143,7 +157,7 @@
     .resistor-text {
       fill: var(--resistance);
       font-weight: bold;
-      font-size: 28px;
+      font-size: 25px;
       text-anchor: middle;
       dominant-baseline: middle;
       pointer-events: none;
@@ -167,22 +181,25 @@
       filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.65));
     }
 
-    .lamp-base {
-      fill: #64748b;
-    }
+    .lamp-base { fill: #64748b; }
 
     .voltage-arrow {
       stroke: var(--voltage);
-      stroke-width: 8;
+      stroke-width: 12;
       stroke-linecap: round;
-      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.8));
+      filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.9));
     }
 
     .voltage-arrow-text {
       fill: var(--voltage);
       font-weight: bold;
       font-size: 22px;
-      text-anchor: middle;
+    }
+
+    .node {
+      fill: var(--wire);
+      stroke: #020617;
+      stroke-width: 4;
     }
 
     .labels {
@@ -200,21 +217,7 @@
       background: rgba(255, 255, 255, 0.08);
     }
 
-    .label.u {
-      color: var(--voltage);
-    }
-
-    .label.i {
-      color: var(--current);
-    }
-
-    .label.r {
-      color: var(--resistance);
-    }
-
-    .control {
-      margin-bottom: 26px;
-    }
+    .control { margin-bottom: 24px; }
 
     .control-title {
       display: flex;
@@ -222,44 +225,35 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 10px;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: bold;
     }
 
-    .control-title.voltage {
-      color: var(--voltage);
-    }
-
-    .control-title.resistance {
-      color: var(--resistance);
-    }
-
-    input[type="range"] {
-      width: 100%;
-      cursor: pointer;
-    }
-
-    #voltage {
-      accent-color: var(--voltage);
-    }
-
-    #resistance {
-      accent-color: var(--resistance);
-    }
+    input[type="range"] { width: 100%; cursor: pointer; }
+    #voltage { accent-color: var(--voltage); }
+    #r1, #r2 { accent-color: var(--resistance); }
 
     .result {
       background: rgba(255, 255, 255, 0.08);
       border-radius: 18px;
       padding: 18px;
-      margin-top: 20px;
+      margin-top: 18px;
       text-align: center;
     }
 
     .result .big {
-      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-size: clamp(1.8rem, 4vw, 3.2rem);
       color: var(--current);
       font-weight: bold;
       margin: 8px 0;
+    }
+
+    .mini-results {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      line-height: 1.35;
     }
 
     .explanation {
@@ -269,14 +263,10 @@
       font-size: 1rem;
     }
 
-    .explanation strong {
-      color: var(--text);
-    }
+    .hidden { display: none; }
 
-    @media (max-width: 850px) {
-      .main {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 900px) {
+      .main { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -292,9 +282,15 @@
       </div>
     </header>
 
+    <div class="tabs">
+      <button class="tab active" data-mode="single">1 resistor</button>
+      <button class="tab" data-mode="series">2 resistores em série</button>
+      <button class="tab" data-mode="parallel">2 resistores em paralelo</button>
+    </div>
+
     <main class="main">
       <section class="circuit-card">
-        <svg id="circuitSvg" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
+        <svg id="circuitSvg" viewBox="0 0 900 540" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <radialGradient id="lampGradient" cx="35%" cy="30%" r="70%">
               <stop offset="0%" stop-color="#fff7ad" />
@@ -302,61 +298,12 @@
               <stop offset="100%" stop-color="#ca8a04" />
             </radialGradient>
 
-            <marker id="blueArrowHead" markerWidth="30" markerHeight="30" refX="24" refY="15" orient="auto" markerUnits="userSpaceOnUse">
-              <path d="M 0 0 L 30 15 L 0 30 z" fill="#38bdf8" />
+            <marker id="blueArrowHead" markerWidth="40" markerHeight="40" refX="32" refY="20" orient="auto" markerUnits="userSpaceOnUse">
+              <path d="M 0 0 L 40 20 L 0 40 z" fill="#38bdf8" />
             </marker>
-
-            <path
-              id="currentPath"
-              d="M 140 280 L 140 120 L 420 120 C 465 120 485 120 520 120 C 555 120 575 120 620 120 L 760 120 L 760 280 L 140 280"
-            />
           </defs>
 
-          <!-- fio -->
-          <use href="#currentPath" class="wire-shadow" />
-          <use href="#currentPath" class="wire" />
-
-          <!-- seta de tensão da fonte -->
-          <line
-            id="sourceVoltageArrow"
-            class="voltage-arrow"
-            x1="48" y1="330"
-            x2="48" y2="270"
-            marker-end="url(#blueArrowHead)"
-          />
-          <text id="sourceVoltageText" class="voltage-arrow-text" x="95" y="245">U = 12 V</text>
-
-          <!-- bateria -->
-          <rect x="82" y="210" width="115" height="145" rx="18" class="battery-body" />
-          <text x="140" y="250" class="battery-text">+</text>
-          <text x="140" y="315" class="battery-text">−</text>
-          <text x="140" y="385" class="battery-text" id="batteryLabel">12 V</text>
-
-          <!-- resistor / mangueira apertada -->
-          <path id="resistorShape" class="resistor-body"></path>
-
-          <!-- seta de tensão no resistor -->
-          <line
-            id="resistorVoltageArrow"
-            class="voltage-arrow"
-            x1="470" y1="45"
-            x2="570" y2="45"
-            marker-end="url(#blueArrowHead)"
-          />
-          <text id="resistorVoltageText" class="voltage-arrow-text" x="520" y="22">U = 12 V</text>
-
-          <!-- setas vermelhas apertando -->
-          <polygon id="topPinch" class="pinch-arrow" points="500,40 540,40 520,75" />
-          <polygon id="bottomPinch" class="pinch-arrow" points="500,200 540,200 520,165" />
-
-          <text x="520" y="120" class="resistor-text" id="resistorLabel">6 Ω</text>
-
-          <!-- lâmpada -->
-          <circle id="lampGlow" cx="760" cy="280" r="78" class="lamp-glow" />
-          <circle cx="760" cy="280" r="46" class="lamp" />
-          <rect x="735" y="325" width="50" height="38" rx="7" class="lamp-base" />
-
-          <!-- corrente -->
+          <g id="diagram"></g>
           <g id="chargesGroup"></g>
         </svg>
 
@@ -369,39 +316,34 @@
 
       <section class="controls-card">
         <div class="control">
-          <div class="control-title voltage">
+          <div class="control-title u">
             <span>Tensão elétrica</span>
             <span id="voltageValue">12 V</span>
           </div>
-          <input
-            id="voltage"
-            type="range"
-            min="1"
-            max="24"
-            value="12"
-            step="1"
-          />
+          <input id="voltage" type="range" min="1" max="24" value="12" step="1" />
         </div>
 
         <div class="control">
-          <div class="control-title resistance">
-            <span>Resistência elétrica</span>
-            <span id="resistanceValue">6 Ω</span>
+          <div class="control-title r">
+            <span id="r1Name">Resistência</span>
+            <span id="r1Value">6 Ω</span>
           </div>
-          <input
-            id="resistance"
-            type="range"
-            min="1"
-            max="20"
-            value="6"
-            step="1"
-          />
+          <input id="r1" type="range" min="1" max="20" value="6" step="1" />
+        </div>
+
+        <div class="control hidden" id="r2Control">
+          <div class="control-title r">
+            <span>Resistência R2</span>
+            <span id="r2Value">6 Ω</span>
+          </div>
+          <input id="r2" type="range" min="1" max="20" value="6" step="1" />
         </div>
 
         <div class="result">
-          <div>Corrente elétrica</div>
+          <div id="resultTitle">Corrente elétrica</div>
           <div class="big" id="currentValue">2,00 A</div>
           <div id="calculation">I = 12 ÷ 6 = 2,00 A</div>
+          <div class="mini-results" id="miniResults"></div>
         </div>
 
         <div class="explanation" id="explanation">
@@ -413,40 +355,34 @@
   </div>
 
   <script>
+    const SVG_NS = "http://www.w3.org/2000/svg";
+
     const voltageSlider = document.getElementById("voltage");
-    const resistanceSlider = document.getElementById("resistance");
+    const r1Slider = document.getElementById("r1");
+    const r2Slider = document.getElementById("r2");
+    const r2Control = document.getElementById("r2Control");
 
     const voltageValue = document.getElementById("voltageValue");
-    const resistanceValue = document.getElementById("resistanceValue");
+    const r1Value = document.getElementById("r1Value");
+    const r2Value = document.getElementById("r2Value");
+    const r1Name = document.getElementById("r1Name");
+
     const currentValue = document.getElementById("currentValue");
     const calculation = document.getElementById("calculation");
-
-    const batteryLabel = document.getElementById("batteryLabel");
-    const resistorLabel = document.getElementById("resistorLabel");
-
-    const lampGlow = document.getElementById("lampGlow");
+    const resultTitle = document.getElementById("resultTitle");
+    const miniResults = document.getElementById("miniResults");
     const explanation = document.getElementById("explanation");
 
-    const resistorShape = document.getElementById("resistorShape");
-    const topPinch = document.getElementById("topPinch");
-    const bottomPinch = document.getElementById("bottomPinch");
-
-    const currentPath = document.getElementById("currentPath");
+    const diagram = document.getElementById("diagram");
     const chargesGroup = document.getElementById("chargesGroup");
+    const tabs = document.querySelectorAll(".tab");
 
-    const sourceVoltageArrow = document.getElementById("sourceVoltageArrow");
-    const sourceVoltageText = document.getElementById("sourceVoltageText");
-    const resistorVoltageArrow = document.getElementById("resistorVoltageArrow");
-    const resistorVoltageText = document.getElementById("resistorVoltageText");
-
-    const CHARGE_COUNT = 8;
     const CHARGE_RADIUS = 10;
 
-    let currentSpeed = 120;
+    let mode = "single";
+    let animatedPaths = [];
     let distanceOffset = 0;
     let lastTime = null;
-    let pathLength = 0;
-    let charges = [];
 
     function formatNumber(value) {
       return value.toFixed(2).replace(".", ",");
@@ -456,160 +392,296 @@
       return outMin + ((value - inMin) * (outMax - outMin)) / (inMax - inMin);
     }
 
-    function createCharges() {
-      chargesGroup.innerHTML = "";
-      charges = [];
+    function el(name, attrs = {}, parent = diagram) {
+      const node = document.createElementNS(SVG_NS, name);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+      parent.appendChild(node);
+      return node;
+    }
 
-      for (let i = 0; i < CHARGE_COUNT; i++) {
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    function wirePath(d) {
+      el("path", { d, class: "wire-shadow" });
+      return el("path", { d, class: "wire" });
+    }
+
+    function text(x, y, content, className, anchor = "middle") {
+      return el("text", {
+        x, y,
+        class: className,
+        "text-anchor": anchor,
+        "dominant-baseline": "middle"
+      }).appendChild(document.createTextNode(content)).parentNode;
+    }
+
+    function battery(x = 82, y = 230, label = "12 V") {
+      el("rect", { x, y, width: 115, height: 145, rx: 18, class: "battery-body" });
+      text(x + 58, y + 40, "+", "battery-text");
+      text(x + 58, y + 105, "−", "battery-text");
+      text(x + 58, y + 175, label, "battery-text");
+    }
+
+    function lamp(cx, cy, intensity) {
+      const normalized = Math.min(intensity / 8, 1);
+      el("circle", {
+        cx, cy,
+        r: 60 + normalized * 55,
+        class: "lamp-glow",
+        opacity: 0.15 + normalized * 0.75
+      });
+      el("circle", { cx, cy, r: 46, class: "lamp" });
+      el("rect", { x: cx - 25, y: cy + 45, width: 50, height: 38, rx: 7, class: "lamp-base" });
+    }
+
+    function resistorShape(cx, cy, resistance, label) {
+      const w = 190;
+      const x1 = cx - w / 2;
+      const x2 = cx + w / 2;
+      const endHalfHeight = 45;
+      const centerHalfHeight = map(resistance, 1, 20, 40, 10);
+
+      const d = `
+        M ${x1} ${cy - endHalfHeight}
+        C ${cx - 65} ${cy - endHalfHeight}, ${cx - 45} ${cy - centerHalfHeight}, ${cx} ${cy - centerHalfHeight}
+        C ${cx + 45} ${cy - centerHalfHeight}, ${cx + 65} ${cy - endHalfHeight}, ${x2} ${cy - endHalfHeight}
+        L ${x2} ${cy + endHalfHeight}
+        C ${cx + 65} ${cy + endHalfHeight}, ${cx + 45} ${cy + centerHalfHeight}, ${cx} ${cy + centerHalfHeight}
+        C ${cx - 45} ${cy + centerHalfHeight}, ${cx - 65} ${cy + endHalfHeight}, ${x1} ${cy + endHalfHeight}
+        Z
+      `;
+
+      el("path", { d, class: "resistor-body" });
+      text(cx, cy, label, "resistor-text");
+
+      const arrowMove = map(resistance, 1, 20, 0, 34);
+      el("polygon", {
+        points: `${cx - 20},${cy - 82 + arrowMove} ${cx + 20},${cy - 82 + arrowMove} ${cx},${cy - 48 + arrowMove}`,
+        class: "pinch-arrow"
+      });
+      el("polygon", {
+        points: `${cx - 20},${cy + 82 - arrowMove} ${cx + 20},${cy + 82 - arrowMove} ${cx},${cy + 48 - arrowMove}`,
+        class: "pinch-arrow"
+      });
+    }
+
+    function voltageArrow(x1, y1, x2, y2, label, textX, textY, anchor = "start") {
+      el("line", {
+        x1, y1, x2, y2,
+        class: "voltage-arrow",
+        "marker-end": "url(#blueArrowHead)"
+      });
+      text(textX, textY, label, "voltage-arrow-text", anchor);
+    }
+
+    function addAnimatedPath(d, current, count) {
+      const path = el("path", { d, fill: "none", stroke: "none" });
+      const charges = [];
+
+      for (let i = 0; i < count; i++) {
+        const circle = document.createElementNS(SVG_NS, "circle");
         circle.setAttribute("r", CHARGE_RADIUS);
         circle.setAttribute("class", "charge");
         chargesGroup.appendChild(circle);
         charges.push(circle);
       }
+
+      animatedPaths.push({
+        path,
+        length: path.getTotalLength(),
+        current,
+        count,
+        charges
+      });
     }
 
-    function updateChargePositions() {
-      for (let i = 0; i < CHARGE_COUNT; i++) {
-        const spacing = pathLength / CHARGE_COUNT;
-        const distance = (distanceOffset + i * spacing) % pathLength;
-        const point = currentPath.getPointAtLength(distance);
+    function updateCharges() {
+      animatedPaths.forEach(item => {
+        const spacing = item.length / item.count;
 
-        charges[i].setAttribute("cx", point.x);
-        charges[i].setAttribute("cy", point.y);
-        charges[i].setAttribute("r", CHARGE_RADIUS);
-        charges[i].setAttribute("opacity", 1);
-      }
+        for (let i = 0; i < item.count; i++) {
+          const speed = map(Math.min(item.current, 24), 0, 24, 45, 500);
+          const distance = (distanceOffset * speed / 500 + i * spacing) % item.length;
+          const point = item.path.getPointAtLength(distance);
+
+          item.charges[i].setAttribute("cx", point.x);
+          item.charges[i].setAttribute("cy", point.y);
+          item.charges[i].setAttribute("r", CHARGE_RADIUS);
+          item.charges[i].setAttribute("opacity", 1);
+        }
+      });
     }
 
-    function animateCharges(timestamp) {
-      if (lastTime === null) {
-        lastTime = timestamp;
-      }
-
+    function animate(timestamp) {
+      if (lastTime === null) lastTime = timestamp;
       const deltaTime = (timestamp - lastTime) / 1000;
       lastTime = timestamp;
 
-      distanceOffset = (distanceOffset + currentSpeed * deltaTime) % pathLength;
-
-      updateChargePositions();
-
-      requestAnimationFrame(animateCharges);
+      distanceOffset = (distanceOffset + 500 * deltaTime) % 100000;
+      updateCharges();
+      requestAnimationFrame(animate);
     }
 
-    function updateResistorShape(resistance) {
-      const x1 = 420;
-      const x2 = 620;
-      const cx = 520;
-      const cy = 120;
-
-      const endHalfHeight = 48;
-      const centerHalfHeight = map(resistance, 1, 20, 42, 10);
-
-      const d = `
-        M ${x1} ${cy - endHalfHeight}
-        C 455 ${cy - endHalfHeight}, 475 ${cy - centerHalfHeight}, ${cx} ${cy - centerHalfHeight}
-        C 565 ${cy - centerHalfHeight}, 585 ${cy - endHalfHeight}, ${x2} ${cy - endHalfHeight}
-        L ${x2} ${cy + endHalfHeight}
-        C 585 ${cy + endHalfHeight}, 565 ${cy + centerHalfHeight}, ${cx} ${cy + centerHalfHeight}
-        C 475 ${cy + centerHalfHeight}, 455 ${cy + endHalfHeight}, ${x1} ${cy + endHalfHeight}
-        Z
-      `;
-
-      resistorShape.setAttribute("d", d);
-
-      const arrowMove = map(resistance, 1, 20, 0, 40);
-
-      topPinch.setAttribute("transform", `translate(0 ${arrowMove})`);
-      bottomPinch.setAttribute("transform", `translate(0 ${-arrowMove})`);
+    function clearDiagram() {
+      diagram.innerHTML = "";
+      chargesGroup.innerHTML = "";
+      animatedPaths = [];
     }
 
-    function updateVoltageArrows(voltage) {
-  const arrowLength = map(voltage, 1, 24, 35, 125);
+    function drawSingle(U, R1, I) {
+      const loop = "M 140 300 L 140 130 L 760 130 L 760 300 L 140 300";
+      wirePath(loop);
+      battery(82, 230, `${U} V`);
+      resistorShape(520, 130, R1, `${R1} Ω`);
+      lamp(760, 300, I);
 
-  // seta ao lado da fonte (vertical)
-  const sourceX = 28;
-  const sourceYBottom = 340;
-  const sourceYTop = sourceYBottom - arrowLength;
+      const sourceLen = map(U, 1, 24, 45, 135);
+      voltageArrow(35, 365, 35, 365 - sourceLen, `U = ${U} V`, 35, 365 - sourceLen - 22, "middle");
 
-  sourceVoltageArrow.setAttribute("x1", sourceX);
-  sourceVoltageArrow.setAttribute("y1", sourceYBottom);
-  sourceVoltageArrow.setAttribute("x2", sourceX);
-  sourceVoltageArrow.setAttribute("y2", sourceYTop);
+      const resistorLen = map(U, 1, 24, 50, 150);
+      voltageArrow(520 - resistorLen / 2, 35, 520 + resistorLen / 2, 35, `U = ${U} V`, 520 + resistorLen / 2 + 26, 43, "start");
 
-  // texto na frente da ponta da seta vertical
-  sourceVoltageText.setAttribute("x", sourceX);
-  sourceVoltageText.setAttribute("y", sourceYTop - 18);
-  sourceVoltageText.setAttribute("text-anchor", "middle");
-  sourceVoltageText.textContent = `U = ${voltage} V`;
+      addAnimatedPath(loop, I, 8);
+    }
 
-  // seta acima do resistor (horizontal)
-  const resistorCenterX = 520;
-  const resistorY = 18;
-  const halfLength = arrowLength / 2;
+    function drawSeries(U, R1, R2, I) {
+      const loop = "M 140 300 L 140 130 L 760 130 L 760 300 L 140 300";
+      wirePath(loop);
+      battery(82, 230, `${U} V`);
+      resistorShape(410, 130, R1, `R1 ${R1} Ω`);
+      resistorShape(620, 130, R2, `R2 ${R2} Ω`);
+      lamp(760, 300, I);
 
-  const resistorX1 = resistorCenterX - halfLength;
-  const resistorX2 = resistorCenterX + halfLength;
+      const U1 = I * R1;
+      const U2 = I * R2;
+      const sourceLen = map(U, 1, 24, 45, 135);
+      voltageArrow(35, 365, 35, 365 - sourceLen, `U = ${U} V`, 35, 365 - sourceLen - 22, "middle");
 
-  resistorVoltageArrow.setAttribute("x1", resistorX1);
-  resistorVoltageArrow.setAttribute("y1", resistorY);
-  resistorVoltageArrow.setAttribute("x2", resistorX2);
-  resistorVoltageArrow.setAttribute("y2", resistorY);
+      const len1 = map(U1, 0, 24, 35, 130);
+      const len2 = map(U2, 0, 24, 35, 130);
+      voltageArrow(410 - len1 / 2, 35, 410 + len1 / 2, 35, `U1 = ${formatNumber(U1)} V`, 410 + len1 / 2 + 24, 43, "start");
+      voltageArrow(620 - len2 / 2, 35, 620 + len2 / 2, 35, `U2 = ${formatNumber(U2)} V`, 620 + len2 / 2 + 24, 43, "start");
 
-  // texto na frente da ponta da seta horizontal
-  resistorVoltageText.setAttribute("x", resistorX2 + 18);
-  resistorVoltageText.setAttribute("y", resistorY + 8);
-  resistorVoltageText.setAttribute("text-anchor", "start");
-  resistorVoltageText.textContent = `${voltage} V`;
-}
+      addAnimatedPath(loop, I, 8);
+    }
+
+    function drawParallel(U, R1, R2, ITotal, I1, I2) {
+      const trunk = "M 140 330 L 140 130 L 300 130";
+      const top = "M 300 130 L 720 130";
+      const leftSplit = "M 300 130 L 300 255";
+      const bottom = "M 300 255 L 720 255";
+      const rightSplit = "M 720 130 L 720 255";
+      const returnPath = "M 720 255 L 720 330 L 140 330";
+
+      wirePath(trunk);
+      wirePath(top);
+      wirePath(leftSplit);
+      wirePath(bottom);
+      wirePath(rightSplit);
+      wirePath(returnPath);
+
+      el("circle", { cx: 300, cy: 130, r: 13, class: "node" });
+      el("circle", { cx: 300, cy: 255, r: 13, class: "node" });
+      el("circle", { cx: 720, cy: 130, r: 13, class: "node" });
+      el("circle", { cx: 720, cy: 255, r: 13, class: "node" });
+
+      battery(82, 260, `${U} V`);
+      resistorShape(520, 130, R1, `R1 ${R1} Ω`);
+      resistorShape(520, 255, R2, `R2 ${R2} Ω`);
+      lamp(760, 330, ITotal);
+
+      const sourceLen = map(U, 1, 24, 45, 135);
+      voltageArrow(35, 395, 35, 395 - sourceLen, `U = ${U} V`, 35, 395 - sourceLen - 22, "middle");
+
+      const resistorLen = map(U, 1, 24, 50, 150);
+      voltageArrow(520 - resistorLen / 2, 35, 520 + resistorLen / 2, 35, `U1 = ${U} V`, 520 + resistorLen / 2 + 26, 43, "start");
+      voltageArrow(520 - resistorLen / 2, 352, 520 + resistorLen / 2, 352, `U2 = ${U} V`, 520 + resistorLen / 2 + 26, 360, "start");
+
+      addAnimatedPath(trunk, ITotal, 5);
+      addAnimatedPath(top, I1, 5);
+      addAnimatedPath(bottom, I2, 5);
+      addAnimatedPath(returnPath, ITotal, 5);
+    }
+
     function updateSimulation() {
-      const voltage = Number(voltageSlider.value);
-      const resistance = Number(resistanceSlider.value);
-      const current = voltage / resistance;
+      const U = Number(voltageSlider.value);
+      const R1 = Number(r1Slider.value);
+      const R2 = Number(r2Slider.value);
 
-      voltageValue.textContent = `${voltage} V`;
-      resistanceValue.textContent = `${resistance} Ω`;
-      currentValue.textContent = `${formatNumber(current)} A`;
+      voltageValue.textContent = `${U} V`;
+      r1Value.textContent = `${R1} Ω`;
+      r2Value.textContent = `${R2} Ω`;
 
-      batteryLabel.textContent = `${voltage} V`;
-      resistorLabel.textContent = `${resistance} Ω`;
+      clearDiagram();
 
-      calculation.textContent =
-        `I = ${voltage} ÷ ${resistance} = ${formatNumber(current)} A`;
+      if (mode === "single") {
+        r2Control.classList.add("hidden");
+        r1Name.textContent = "Resistência";
+        const I = U / R1;
 
-      const normalizedCurrent = Math.min(current / 8, 1);
-
-      lampGlow.setAttribute("opacity", 0.15 + normalizedCurrent * 0.75);
-      lampGlow.setAttribute("r", 60 + normalizedCurrent * 55);
-
-      // corrente: só muda velocidade
-      currentSpeed = map(Math.min(current, 24), 0, 24, 45, 500);
-
-      updateResistorShape(resistance);
-      updateVoltageArrows(voltage);
-
-      if (current < 1) {
-        explanation.innerHTML =
-          "A corrente está <strong>baixa</strong>: as cargas se movem mais devagar.";
-      } else if (current < 4) {
-        explanation.innerHTML =
-          "A corrente está <strong>moderada</strong>: as cargas se movem em velocidade normal.";
-      } else {
-        explanation.innerHTML =
-          "A corrente está <strong>alta</strong>: as cargas se movem mais rápido.";
+        drawSingle(U, R1, I);
+        resultTitle.textContent = "Corrente elétrica";
+        currentValue.textContent = `${formatNumber(I)} A`;
+        calculation.textContent = `I = U ÷ R = ${U} ÷ ${R1} = ${formatNumber(I)} A`;
+        miniResults.innerHTML = "";
+        explanation.innerHTML = "Um resistor: a tensão <strong>U</strong> empurra a corrente através da resistência <strong>R</strong>.";
       }
+
+      if (mode === "series") {
+        r2Control.classList.remove("hidden");
+        r1Name.textContent = "Resistência R1";
+        const Req = R1 + R2;
+        const I = U / Req;
+        const U1 = I * R1;
+        const U2 = I * R2;
+
+        drawSeries(U, R1, R2, I);
+        resultTitle.textContent = "Corrente total";
+        currentValue.textContent = `${formatNumber(I)} A`;
+        calculation.textContent = `R_eq = R1 + R2 = ${Req} Ω`;
+        miniResults.innerHTML = `
+          <div>I = U ÷ R_eq = ${U} ÷ ${Req} = ${formatNumber(I)} A</div>
+          <div>U1 = ${formatNumber(U1)} V | U2 = ${formatNumber(U2)} V</div>
+        `;
+        explanation.innerHTML = "Em série, a <strong>corrente é a mesma</strong> nos dois resistores. A tensão se divide entre R1 e R2.";
+      }
+
+      if (mode === "parallel") {
+        r2Control.classList.remove("hidden");
+        r1Name.textContent = "Resistência R1";
+        const Req = (R1 * R2) / (R1 + R2);
+        const I1 = U / R1;
+        const I2 = U / R2;
+        const ITotal = I1 + I2;
+
+        drawParallel(U, R1, R2, ITotal, I1, I2);
+        resultTitle.textContent = "Corrente total";
+        currentValue.textContent = `${formatNumber(ITotal)} A`;
+        calculation.textContent = `R_eq = (R1 × R2) ÷ (R1 + R2) = ${formatNumber(Req)} Ω`;
+        miniResults.innerHTML = `
+          <div>I1 = U ÷ R1 = ${formatNumber(I1)} A</div>
+          <div>I2 = U ÷ R2 = ${formatNumber(I2)} A</div>
+          <div>I_total = I1 + I2 = ${formatNumber(ITotal)} A</div>
+        `;
+        explanation.innerHTML = "Em paralelo, a <strong>tensão é a mesma</strong> nos dois resistores. A corrente se divide em dois caminhos.";
+      }
+
+      updateCharges();
     }
+
+    tabs.forEach(button => {
+      button.addEventListener("click", () => {
+        tabs.forEach(tab => tab.classList.remove("active"));
+        button.classList.add("active");
+        mode = button.dataset.mode;
+        updateSimulation();
+      });
+    });
 
     voltageSlider.addEventListener("input", updateSimulation);
-    resistanceSlider.addEventListener("input", updateSimulation);
+    r1Slider.addEventListener("input", updateSimulation);
+    r2Slider.addEventListener("input", updateSimulation);
 
-    pathLength = currentPath.getTotalLength();
-
-    createCharges();
     updateSimulation();
-    updateChargePositions();
-
-    requestAnimationFrame(animateCharges);
+    requestAnimationFrame(animate);
   </script>
 </body>
 </html>
