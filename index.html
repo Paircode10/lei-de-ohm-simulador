@@ -302,8 +302,8 @@
               <stop offset="100%" stop-color="#ca8a04" />
             </radialGradient>
 
-            <marker id="blueArrowHead" markerWidth="20" markerHeight="20" refX="16" refY="10" orient="auto" markerUnits="userSpaceOnUse">
-              <path d="M 0 0 L 20 10 L 0 20 z" fill="#38bdf8" />
+            <marker id="blueArrowHead" markerWidth="30" markerHeight="30" refX="24" refY="15" orient="auto" markerUnits="userSpaceOnUse">
+              <path d="M 0 0 L 30 15 L 0 30 z" fill="#38bdf8" />
             </marker>
 
             <path
@@ -560,7 +560,7 @@
   resistorVoltageText.setAttribute("x", resistorX2 + 18);
   resistorVoltageText.setAttribute("y", resistorY + 8);
   resistorVoltageText.setAttribute("text-anchor", "start");
-  resistorVoltageText.textContent = `U = ${voltage} V`;
+  resistorVoltageText.textContent = `${voltage} V`;
 }
     function updateSimulation() {
       const voltage = Number(voltageSlider.value);
