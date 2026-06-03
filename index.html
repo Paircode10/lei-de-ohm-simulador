@@ -525,40 +525,43 @@
     }
 
     function updateVoltageArrows(voltage) {
-      const arrowLength = map(voltage, 1, 24, 35, 125);
+  const arrowLength = map(voltage, 1, 24, 35, 125);
 
-      // seta ao lado da fonte (vertical) - mais afastada da bateria
-      const sourceX = 28;
-      const sourceYBottom = 340;
-      const sourceYTop = sourceYBottom - arrowLength;
+  // seta ao lado da fonte (vertical)
+  const sourceX = 28;
+  const sourceYBottom = 340;
+  const sourceYTop = sourceYBottom - arrowLength;
 
-      sourceVoltageArrow.setAttribute("x1", sourceX);
-      sourceVoltageArrow.setAttribute("y1", sourceYBottom);
-      sourceVoltageArrow.setAttribute("x2", sourceX);
-      sourceVoltageArrow.setAttribute("y2", sourceYTop);
+  sourceVoltageArrow.setAttribute("x1", sourceX);
+  sourceVoltageArrow.setAttribute("y1", sourceYBottom);
+  sourceVoltageArrow.setAttribute("x2", sourceX);
+  sourceVoltageArrow.setAttribute("y2", sourceYTop);
 
-      sourceVoltageText.setAttribute("x", 105);
-      sourceVoltageText.setAttribute("y", sourceYTop - 18);
-      sourceVoltageText.textContent = `U = ${voltage} V`;
+  // texto na frente da ponta da seta vertical
+  sourceVoltageText.setAttribute("x", sourceX);
+  sourceVoltageText.setAttribute("y", sourceYTop - 18);
+  sourceVoltageText.setAttribute("text-anchor", "middle");
+  sourceVoltageText.textContent = `U = ${voltage} V`;
 
-      // seta acima do resistor (horizontal) - mais afastada do resistor
-      const resistorCenterX = 520;
-      const resistorY = 18;
-      const halfLength = arrowLength / 2;
+  // seta acima do resistor (horizontal)
+  const resistorCenterX = 520;
+  const resistorY = 18;
+  const halfLength = arrowLength / 2;
 
-      const resistorX1 = resistorCenterX - halfLength;
-      const resistorX2 = resistorCenterX + halfLength;
+  const resistorX1 = resistorCenterX - halfLength;
+  const resistorX2 = resistorCenterX + halfLength;
 
-      resistorVoltageArrow.setAttribute("x1", resistorX1);
-      resistorVoltageArrow.setAttribute("y1", resistorY);
-      resistorVoltageArrow.setAttribute("x2", resistorX2);
-      resistorVoltageArrow.setAttribute("y2", resistorY);
+  resistorVoltageArrow.setAttribute("x1", resistorX1);
+  resistorVoltageArrow.setAttribute("y1", resistorY);
+  resistorVoltageArrow.setAttribute("x2", resistorX2);
+  resistorVoltageArrow.setAttribute("y2", resistorY);
 
-      resistorVoltageText.setAttribute("x", resistorCenterX);
-      resistorVoltageText.setAttribute("y", resistorY - 12);
-      resistorVoltageText.textContent = `U = ${voltage} V`;
-    }
-
+  // texto na frente da ponta da seta horizontal
+  resistorVoltageText.setAttribute("x", resistorX2 + 18);
+  resistorVoltageText.setAttribute("y", resistorY + 8);
+  resistorVoltageText.setAttribute("text-anchor", "start");
+  resistorVoltageText.textContent = `U = ${voltage} V`;
+}
     function updateSimulation() {
       const voltage = Number(voltageSlider.value);
       const resistance = Number(resistanceSlider.value);
