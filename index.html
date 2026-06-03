@@ -59,7 +59,7 @@
       font-weight: bold;
     }
 
-    .formula .v {
+    .formula .u {
       color: var(--voltage);
     }
 
@@ -171,6 +171,20 @@
       fill: #64748b;
     }
 
+    .voltage-arrow {
+      stroke: var(--voltage);
+      stroke-width: 8;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.8));
+    }
+
+    .voltage-arrow-text {
+      fill: var(--voltage);
+      font-weight: bold;
+      font-size: 22px;
+      text-anchor: middle;
+    }
+
     .labels {
       display: flex;
       justify-content: space-around;
@@ -186,7 +200,7 @@
       background: rgba(255, 255, 255, 0.08);
     }
 
-    .label.v {
+    .label.u {
       color: var(--voltage);
     }
 
@@ -272,9 +286,9 @@
     <header>
       <h1>Simulador da Lei de Ohm</h1>
       <div class="formula">
-        <span class="v">V</span> =
-        <span class="i">I</span> ×
-        <span class="r">R</span>
+        <span class="u">U</span> =
+        <span class="r">R</span> ×
+        <span class="i">I</span>
       </div>
     </header>
 
@@ -288,38 +302,68 @@
               <stop offset="100%" stop-color="#ca8a04" />
             </radialGradient>
 
+            <marker id="blueArrowHead" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+              <path d="M 0 0 L 12 6 L 0 12 z" fill="#38bdf8" />
+            </marker>
+
             <path
               id="currentPath"
               d="M 140 280 L 140 120 L 420 120 C 465 120 485 120 520 120 C 555 120 575 120 620 120 L 760 120 L 760 280 L 140 280"
             />
           </defs>
 
+          <!-- fio -->
           <use href="#currentPath" class="wire-shadow" />
           <use href="#currentPath" class="wire" />
 
+          <!-- seta de tensão da fonte -->
+          <line
+            id="sourceVoltageArrow"
+            class="voltage-arrow"
+            x1="48" y1="330"
+            x2="48" y2="270"
+            marker-end="url(#blueArrowHead)"
+          />
+          <text id="sourceVoltageText" class="voltage-arrow-text" x="95" y="245">U = 12 V</text>
+
+          <!-- bateria -->
           <rect x="82" y="210" width="115" height="145" rx="18" class="battery-body" />
           <text x="140" y="250" class="battery-text">+</text>
           <text x="140" y="315" class="battery-text">−</text>
           <text x="140" y="385" class="battery-text" id="batteryLabel">12 V</text>
 
+          <!-- resistor / mangueira apertada -->
           <path id="resistorShape" class="resistor-body"></path>
 
+          <!-- seta de tensão no resistor -->
+          <line
+            id="resistorVoltageArrow"
+            class="voltage-arrow"
+            x1="470" y1="45"
+            x2="570" y2="45"
+            marker-end="url(#blueArrowHead)"
+          />
+          <text id="resistorVoltageText" class="voltage-arrow-text" x="520" y="22">U = 12 V</text>
+
+          <!-- setas vermelhas apertando -->
           <polygon id="topPinch" class="pinch-arrow" points="500,40 540,40 520,75" />
           <polygon id="bottomPinch" class="pinch-arrow" points="500,200 540,200 520,165" />
 
           <text x="520" y="120" class="resistor-text" id="resistorLabel">6 Ω</text>
 
+          <!-- lâmpada -->
           <circle id="lampGlow" cx="760" cy="280" r="78" class="lamp-glow" />
           <circle cx="760" cy="280" r="46" class="lamp" />
           <rect x="735" y="325" width="50" height="38" rx="7" class="lamp-base" />
 
+          <!-- corrente -->
           <g id="chargesGroup"></g>
         </svg>
 
         <div class="labels">
-          <div class="label v">Tensão: força que empurra</div>
-          <div class="label i">Corrente: movimento das cargas</div>
-          <div class="label r">Resistência: dificuldade</div>
+          <div class="label u">Tensão (U): força que empurra</div>
+          <div class="label i">Corrente (I): movimento das cargas</div>
+          <div class="label r">Resistência (R): dificuldade</div>
         </div>
       </section>
 
@@ -390,6 +434,11 @@
     const currentPath = document.getElementById("currentPath");
     const chargesGroup = document.getElementById("chargesGroup");
 
+    const sourceVoltageArrow = document.getElementById("sourceVoltageArrow");
+    const sourceVoltageText = document.getElementById("sourceVoltageText");
+    const resistorVoltageArrow = document.getElementById("resistorVoltageArrow");
+    const resistorVoltageText = document.getElementById("resistorVoltageText");
+
     const CHARGE_COUNT = 8;
     const CHARGE_RADIUS = 10;
 
@@ -455,11 +504,6 @@
       const cy = 120;
 
       const endHalfHeight = 48;
-
-      /*
-        Resistência baixa: meio mais aberto.
-        Resistência alta: meio mais apertado.
-      */
       const centerHalfHeight = map(resistance, 1, 20, 42, 10);
 
       const d = `
@@ -478,6 +522,41 @@
 
       topPinch.setAttribute("transform", `translate(0 ${arrowMove})`);
       bottomPinch.setAttribute("transform", `translate(0 ${-arrowMove})`);
+    }
+
+    function updateVoltageArrows(voltage) {
+      const arrowLength = map(voltage, 1, 24, 35, 125);
+
+      // seta ao lado da fonte (vertical)
+      const sourceX = 48;
+      const sourceYBottom = 330;
+      const sourceYTop = sourceYBottom - arrowLength;
+
+      sourceVoltageArrow.setAttribute("x1", sourceX);
+      sourceVoltageArrow.setAttribute("y1", sourceYBottom);
+      sourceVoltageArrow.setAttribute("x2", sourceX);
+      sourceVoltageArrow.setAttribute("y2", sourceYTop);
+
+      sourceVoltageText.setAttribute("x", 105);
+      sourceVoltageText.setAttribute("y", sourceYTop - 12);
+      sourceVoltageText.textContent = `U = ${voltage} V`;
+
+      // seta acima do resistor (horizontal)
+      const resistorCenterX = 520;
+      const resistorY = 45;
+      const halfLength = arrowLength / 2;
+
+      const resistorX1 = resistorCenterX - halfLength;
+      const resistorX2 = resistorCenterX + halfLength;
+
+      resistorVoltageArrow.setAttribute("x1", resistorX1);
+      resistorVoltageArrow.setAttribute("y1", resistorY);
+      resistorVoltageArrow.setAttribute("x2", resistorX2);
+      resistorVoltageArrow.setAttribute("y2", resistorY);
+
+      resistorVoltageText.setAttribute("x", resistorCenterX);
+      resistorVoltageText.setAttribute("y", 22);
+      resistorVoltageText.textContent = `U = ${voltage} V`;
     }
 
     function updateSimulation() {
@@ -500,14 +579,11 @@
       lampGlow.setAttribute("opacity", 0.15 + normalizedCurrent * 0.75);
       lampGlow.setAttribute("r", 60 + normalizedCurrent * 55);
 
-      /*
-        Corrente maior = bolinhas mais rápidas.
-        Tamanho e quantidade nunca mudam.
-      */
-        
-      currentSpeed = map(Math.min(current, 24), 0, 24, 30, 1500);
+      // corrente: só muda velocidade
+      currentSpeed = map(Math.min(current, 24), 0, 24, 45, 500);
 
       updateResistorShape(resistance);
+      updateVoltageArrows(voltage);
 
       if (current < 1) {
         explanation.innerHTML =
