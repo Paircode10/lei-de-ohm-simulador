@@ -302,8 +302,8 @@
               <stop offset="100%" stop-color="#ca8a04" />
             </radialGradient>
 
-            <marker id="blueArrowHead" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto" markerUnits="userSpaceOnUse">
-              <path d="M 0 0 L 12 6 L 0 12 z" fill="#38bdf8" />
+            <marker id="blueArrowHead" markerWidth="20" markerHeight="20" refX="16" refY="10" orient="auto" markerUnits="userSpaceOnUse">
+              <path d="M 0 0 L 20 10 L 0 20 z" fill="#38bdf8" />
             </marker>
 
             <path
@@ -527,9 +527,9 @@
     function updateVoltageArrows(voltage) {
       const arrowLength = map(voltage, 1, 24, 35, 125);
 
-      // seta ao lado da fonte (vertical)
-      const sourceX = 48;
-      const sourceYBottom = 330;
+      // seta ao lado da fonte (vertical) - mais afastada da bateria
+      const sourceX = 28;
+      const sourceYBottom = 340;
       const sourceYTop = sourceYBottom - arrowLength;
 
       sourceVoltageArrow.setAttribute("x1", sourceX);
@@ -538,12 +538,12 @@
       sourceVoltageArrow.setAttribute("y2", sourceYTop);
 
       sourceVoltageText.setAttribute("x", 105);
-      sourceVoltageText.setAttribute("y", sourceYTop - 12);
+      sourceVoltageText.setAttribute("y", sourceYTop - 18);
       sourceVoltageText.textContent = `U = ${voltage} V`;
 
-      // seta acima do resistor (horizontal)
+      // seta acima do resistor (horizontal) - mais afastada do resistor
       const resistorCenterX = 520;
-      const resistorY = 45;
+      const resistorY = 18;
       const halfLength = arrowLength / 2;
 
       const resistorX1 = resistorCenterX - halfLength;
@@ -555,7 +555,7 @@
       resistorVoltageArrow.setAttribute("y2", resistorY);
 
       resistorVoltageText.setAttribute("x", resistorCenterX);
-      resistorVoltageText.setAttribute("y", 22);
+      resistorVoltageText.setAttribute("y", resistorY - 12);
       resistorVoltageText.textContent = `U = ${voltage} V`;
     }
 
